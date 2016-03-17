@@ -6,6 +6,8 @@
     <color name="photo_placeholder">#f5f5f5</color>
     <color name="ltgray">#fafafa</color>
 
+    <color name="text_primary_color">#424242</color>
+
     <color name="theme_accent">#68EFAD</color>
     <color name="notification">@color/theme_primary</color>
 

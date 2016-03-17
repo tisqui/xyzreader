@@ -46,7 +46,7 @@ public class ArticleDetailActivity extends BaseActivity
                             View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
         }
         setContentView(R.layout.activity_article_detail);
-        activateToolbarWithHomeEnabled();
+//        activateToolbarWithHomeEnabled();
 
         getLoaderManager().initLoader(0, null, this);
 
