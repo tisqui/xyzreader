@@ -8,4 +8,8 @@
 
     <color name="theme_accent">#68EFAD</color>
     <color name="notification">@color/theme_primary</color>
+
+    <color name="primaryTextColorToolbar">#FFFFFF</color>
+    <color name="hightlightTextColorPopup">#68EFAD</color>
+
 </resources>
