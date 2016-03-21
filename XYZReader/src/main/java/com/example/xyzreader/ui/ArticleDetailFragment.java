@@ -44,7 +44,7 @@ public class ArticleDetailFragment extends Fragment implements
     private Cursor mCursor;
     private long mItemId;
     private View mRootView;
-    private int mMutedColor = 0xFF333333;
+    private int mMutedColor = 0xFFfd5621;
     private ObservableScrollView mScrollView;
     private DrawInsetsFrameLayout mDrawInsetsFrameLayout;
     private ColorDrawable mStatusBarColorDrawable;
@@ -125,7 +125,7 @@ public class ArticleDetailFragment extends Fragment implements
 
                 FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.share_fab);
                 if (fab != null) {
-                    if (mScrollY <= 200) {
+                    if (mScrollY <= 250) {
                         fab.setVisibility(View.GONE);
                     } else {
                         fab.setVisibility(View.VISIBLE);
@@ -215,8 +215,9 @@ public class ArticleDetailFragment extends Fragment implements
                             Bitmap bitmap = imageContainer.getBitmap();
                             if (bitmap != null) {
                                 Palette p = Palette.generate(bitmap, 12);
-                                mMutedColor = p.getDarkMutedColor(0xFF333333);
+                                mMutedColor = p.getLightVibrantColor(0xFFfd5621);
                                 mPhotoView.setImageBitmap(imageContainer.getBitmap());
+                               //set the color of the bar under title
                                 mRootView.findViewById(R.id.meta_bar)
                                         .setBackgroundColor(mMutedColor);
                                 updateStatusBar();

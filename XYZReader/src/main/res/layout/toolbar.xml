@@ -7,5 +7,4 @@
     app:contentInsetStart="72dp"
     app:layout_collapseMode="pin"
     app:theme="@style/ActionBarThemeOverlay">
-
 </android.support.v7.widget.Toolbar>

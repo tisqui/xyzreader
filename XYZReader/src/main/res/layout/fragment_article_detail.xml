@@ -65,7 +65,7 @@
                         android:fontFamily="sans-serif-condensed"
                         android:lineSpacingMultiplier="0.9"
                         android:paddingBottom="@dimen/detail_metabar_title_bottom_padding"
-                        android:textColor="@color/text_primary_color"
+                        android:textColor="@color/detail_page_title_text_color"
                         android:textSize="@dimen/detail_title_text_size"
                         android:textStyle="bold"/>
 
@@ -74,7 +74,7 @@
                         style="?android:attr/textAppearanceSmall"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/text_primary_color"/>
+                        android:textColor="@color/detail_page_title_text_color"/>
                 </LinearLayout>
 
                 <TextView
@@ -94,6 +94,7 @@
         </FrameLayout>
     </com.example.xyzreader.ui.ObservableScrollView>
 
+
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/share_fab"
         android:layout_width="56dp"
@@ -104,7 +105,7 @@
         android:background="@drawable/add_fab_background"
         android:contentDescription="@string/action_share"
         android:elevation="@dimen/fab_elevation"
-        android:src="@drawable/ic_share"
-        app:layout_behavior="com.example.xyzreader.ui.ScrollAwareFABBehaviour"/>
+        android:src="@drawable/ic_share"/>
+
 
 </com.example.xyzreader.ui.DrawInsetsFrameLayout>

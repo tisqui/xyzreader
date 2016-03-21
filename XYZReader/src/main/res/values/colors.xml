@@ -1,17 +1,20 @@
 <resources>
-    <color name="theme_primary">#9B26AF</color>
-    <color name="theme_primary_dark">#691A99</color>
-    <color name="theme_primary_lighter">#7A1EA1</color>
+    <color name="theme_primary">#fd5621</color>
+    <color name="theme_primary_dark">#f25220</color>
+    <color name="theme_primary_lighter">#f1693e</color>
 
     <color name="photo_placeholder">#f5f5f5</color>
     <color name="ltgray">#fafafa</color>
 
     <color name="text_primary_color">#424242</color>
 
-    <color name="theme_accent">#68EFAD</color>
+    <color name="theme_accent">#ffc400</color>
     <color name="notification">@color/theme_primary</color>
 
     <color name="primaryTextColorToolbar">#FFFFFF</color>
-    <color name="hightlightTextColorPopup">#68EFAD</color>
+    <color name="hightlightTextColorPopup">#ffd740</color>
 
+    <color name="detail_page_title_text_color">#FFFFFF</color>
+    <color name="photos_list_background">#FFFFFF</color>
+    <color name="photos_card_background">#eeeeee</color>
 </resources>
