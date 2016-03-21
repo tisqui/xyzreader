@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.support.v13.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.TypedValue;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -188,4 +189,22 @@ public class ArticleDetailActivity extends BaseActivity
             return (mCursor != null) ? mCursor.getCount() : 0;
         }
     }
+
+
+    /**
+     * Doing this to try to get the reverse transaction animation when press the up button. This
+     * is against the guidelines, but will leave it until find the way to get back to
+     * the same image user was looking in the pager when getting back to the list activity.
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }
+        return false;
+    }
+
+
 }
