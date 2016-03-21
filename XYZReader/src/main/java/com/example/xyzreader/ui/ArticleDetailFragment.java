@@ -11,6 +11,7 @@ import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ShareCompat;
 import android.support.v7.graphics.Palette;
 import android.text.Html;
@@ -120,6 +121,16 @@ public class ArticleDetailFragment extends Fragment implements
                 getActivityCast().onUpButtonFloorChanged(mItemId, ArticleDetailFragment.this);
                 mPhotoContainerView.setTranslationY((int) (mScrollY - mScrollY / PARALLAX_FACTOR));
                 updateStatusBar();
+
+
+                FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.share_fab);
+                if (fab != null) {
+                    if (mScrollY <= 200) {
+                        fab.setVisibility(View.GONE);
+                    } else {
+                        fab.setVisibility(View.VISIBLE);
+                    }
+                }
             }
         });
 
