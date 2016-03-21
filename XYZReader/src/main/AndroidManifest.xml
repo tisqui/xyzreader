@@ -16,7 +16,7 @@
 
         <activity
             android:name=".ui.ArticleListActivity"
-            android:label="">
+            android:label="XYZ Reader">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

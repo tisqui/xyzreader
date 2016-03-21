@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ShareCompat;
@@ -21,6 +22,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -33,6 +35,9 @@ import com.example.xyzreader.data.ArticleLoader;
  * A fragment representing a single Article detail screen. This fragment is
  * either contained in a {@link ArticleListActivity} in two-pane mode (on
  * tablets) or a {@link ArticleDetailActivity} on handsets.
+ *
+ * tisqui: Thanks to http://www.androiddesignpatterns.com/2015/03/activity-postponed-shared-element-transitions-part3b.html
+ * for information on transitions delay
  */
 public class ArticleDetailFragment extends Fragment implements
         LoaderManager.LoaderCallbacks<Cursor> {
@@ -55,6 +60,8 @@ public class ArticleDetailFragment extends Fragment implements
     private int mScrollY;
     private boolean mIsCard = false;
     private int mStatusBarFullOpacityBottom;
+
+    private String mTransactionName;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -122,19 +129,28 @@ public class ArticleDetailFragment extends Fragment implements
                 mPhotoContainerView.setTranslationY((int) (mScrollY - mScrollY / PARALLAX_FACTOR));
                 updateStatusBar();
 
-
                 FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.share_fab);
                 if (fab != null) {
                     if (mScrollY <= 250) {
-                        fab.setVisibility(View.GONE);
-                    } else {
                         fab.setVisibility(View.VISIBLE);
+                    } else {
+                        fab.setVisibility(View.GONE);
                     }
                 }
             }
         });
 
         mPhotoView = (ImageView) mRootView.findViewById(R.id.photo);
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && mPhotoView != null) {
+            // set the transition name for the image
+            String tname = getString(R.string.transitionPhotoNamePref)
+                    + String.valueOf(mItemId);
+            mPhotoView.setTransitionName(tname);
+
+        }
+
         mPhotoContainerView = mRootView.findViewById(R.id.photo_container);
 
         mStatusBarColorDrawable = new ColorDrawable(0);
@@ -188,7 +204,7 @@ public class ArticleDetailFragment extends Fragment implements
             return;
         }
 
-        TextView titleView = (TextView) mRootView.findViewById(R.id.article_title);
+        final TextView titleView = (TextView) mRootView.findViewById(R.id.article_title);
         TextView bylineView = (TextView) mRootView.findViewById(R.id.article_byline);
         bylineView.setMovementMethod(new LinkMovementMethod());
         TextView bodyView = (TextView) mRootView.findViewById(R.id.article_body);
@@ -221,6 +237,11 @@ public class ArticleDetailFragment extends Fragment implements
                                 mRootView.findViewById(R.id.meta_bar)
                                         .setBackgroundColor(mMutedColor);
                                 updateStatusBar();
+
+                                //delay the transition before everything is loaded
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                    scheduleStartPostponedTransition(mPhotoView);
+                                }
                             }
                         }
 
@@ -229,11 +250,26 @@ public class ArticleDetailFragment extends Fragment implements
 
                         }
                     });
+
         } else {
             mRootView.setVisibility(View.GONE);
             titleView.setText("N/A");
             bylineView.setText("N/A" );
             bodyView.setText("N/A");
+        }
+    }
+
+    private void scheduleStartPostponedTransition(final View sharedElement) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            sharedElement.getViewTreeObserver().addOnPreDrawListener(
+                    new ViewTreeObserver.OnPreDrawListener() {
+                        @Override
+                        public boolean onPreDraw() {
+                            sharedElement.getViewTreeObserver().removeOnPreDrawListener(this);
+                            getActivity().startPostponedEnterTransition();
+                            return true;
+                        }
+                    });
         }
     }
 

@@ -9,4 +9,8 @@
 
     <string name="up">Up</string>
 
+    <string name="transitionPhotoName">photo</string>
+    <string name="transitionPhotoNamePref">trans_</string>
+
+
 </resources>

@@ -7,13 +7,17 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.Loader;
 import android.database.Cursor;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.text.format.DateUtils;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.xyzreader.R;
@@ -29,6 +33,7 @@ import com.example.xyzreader.data.UpdaterService;
  */
 public class ArticleListActivity extends BaseActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
+    public static final String TRANSACTION_NAME_TAG = "TRANS_TAG";
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView mRecyclerView;
@@ -124,8 +129,27 @@ public class ArticleListActivity extends BaseActivity implements
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    startActivity(new Intent(Intent.ACTION_VIEW,
-                            ItemsContract.Items.buildItemUri(getItemId(vh.getAdapterPosition()))));
+                    Intent intent = new Intent(Intent.ACTION_VIEW,
+                            ItemsContract.Items.buildItemUri(getItemId(vh.getAdapterPosition())));
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        //need to set the unique transition name for every fragment instance
+                        ImageView image = (ImageView) view.findViewById(R.id.thumbnail);
+                        long itemId = getItemId(vh.getAdapterPosition());
+                        String tName = getString(R.string.transitionPhotoNamePref) + String.valueOf(itemId);
+                        image.setTransitionName(tName);
+                        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                                ArticleListActivity.this,
+                                image,
+                                tName);
+                        ActivityCompat.startActivity(ArticleListActivity.this,
+                                intent,
+                                options.toBundle());
+
+                    }
+                    else {
+                        startActivity(intent);
+                    }
                 }
             });
             return vh;

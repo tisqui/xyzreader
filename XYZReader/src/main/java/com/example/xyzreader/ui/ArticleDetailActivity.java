@@ -39,6 +39,12 @@ public class ArticleDetailActivity extends BaseActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Bundle extras = getIntent().getExtras();
+        if(extras != null){
+            String name = extras.getString(ArticleListActivity.TRANSACTION_NAME_TAG);
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             getWindow().getDecorView().setSystemUiVisibility(
                     View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
@@ -46,6 +52,12 @@ public class ArticleDetailActivity extends BaseActivity
         }
         setContentView(R.layout.activity_article_detail);
         activateToolbarWithHomeEnabled();
+
+        //postpone the transition, so to show it only when everything is loaded
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            postponeEnterTransition();
+        }
 
         getLoaderManager().initLoader(0, null, this);
 
