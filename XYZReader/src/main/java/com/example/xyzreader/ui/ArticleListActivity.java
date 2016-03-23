@@ -175,8 +175,22 @@ public class ArticleListActivity extends BaseActivity implements
                             DateUtils.FORMAT_ABBREV_ALL).toString()
                             + " by "
                             + mCursor.getString(ArticleLoader.Query.AUTHOR));
+
+            boolean tabletSize = getResources().getBoolean(R.bool.isTablet);
+            if (tabletSize) {
+                //load the large images for tablet
+                holder.thumbnailView.setImageUrl(
+                        mCursor.getString(ArticleLoader.Query.PHOTO_URL),
+                        ImageLoaderHelper.getInstance(ArticleListActivity.this).getImageLoader());
+            } else {
+                //load thumbnails for smaller phones
+                holder.thumbnailView.setImageUrl(
+                        mCursor.getString(ArticleLoader.Query.THUMB_URL),
+                        ImageLoaderHelper.getInstance(ArticleListActivity.this).getImageLoader());
+            }
+
             holder.thumbnailView.setImageUrl(
-                    mCursor.getString(ArticleLoader.Query.THUMB_URL),
+                    mCursor.getString(ArticleLoader.Query.PHOTO_URL),
                     ImageLoaderHelper.getInstance(ArticleListActivity.this).getImageLoader());
             holder.thumbnailView.setAspectRatio(mCursor.getFloat(ArticleLoader.Query.ASPECT_RATIO));
         }
