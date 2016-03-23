@@ -13,6 +13,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ShareCompat;
 import android.support.v7.graphics.Palette;
@@ -26,6 +27,7 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
@@ -45,6 +47,7 @@ public class ArticleDetailFragment extends Fragment implements
     private static final String TAG = "ArticleDetailFragment";
 
     public static final String ARG_ITEM_ID = "item_id";
+    public static final String POSITION = "position";
     private static final float PARALLAX_FACTOR = 1.25f;
 
     private Cursor mCursor;
@@ -63,6 +66,7 @@ public class ArticleDetailFragment extends Fragment implements
     private int mStatusBarFullOpacityBottom;
 
     private Typeface mCustomFont;
+    private int mPositionOfFragment;
 
     private String mTransactionName;
 
@@ -73,12 +77,26 @@ public class ArticleDetailFragment extends Fragment implements
     public ArticleDetailFragment() {
     }
 
-    public static ArticleDetailFragment newInstance(long itemId) {
+    public static ArticleDetailFragment newInstance(long itemId, int position) {
         Bundle arguments = new Bundle();
         arguments.putLong(ARG_ITEM_ID, itemId);
+        arguments.putInt(POSITION, position);
         ArticleDetailFragment fragment = new ArticleDetailFragment();
         fragment.setArguments(arguments);
         return fragment;
+    }
+
+    /**
+     * @return ImageView if it is visible now and null if not
+     */
+    @Nullable
+    public ImageView getVisibleSharedPhotoView(){
+        Rect containerBounds = new Rect();
+        getActivity().getWindow().getDecorView().getHitRect(containerBounds);
+        if(mPhotoView.getLocalVisibleRect(containerBounds)){
+            return mPhotoView;
+        }
+        return null;
     }
 
     @Override
@@ -87,6 +105,7 @@ public class ArticleDetailFragment extends Fragment implements
 
         if (getArguments().containsKey(ARG_ITEM_ID)) {
             mItemId = getArguments().getLong(ARG_ITEM_ID);
+            mPositionOfFragment = getArguments().getInt(POSITION);
         }
 
         mIsCard = getResources().getBoolean(R.bool.detail_is_card);
@@ -128,7 +147,7 @@ public class ArticleDetailFragment extends Fragment implements
             @Override
             public void onScrollChanged() {
                 mScrollY = mScrollView.getScrollY();
-                getActivityCast().onUpButtonFloorChanged(mItemId, ArticleDetailFragment.this);
+//                getActivityCast().onUpButtonFloorChanged(mItemId, ArticleDetailFragment.this);
                 mPhotoContainerView.setTranslationY((int) (mScrollY - mScrollY / PARALLAX_FACTOR));
                 updateStatusBar();
 
@@ -148,8 +167,9 @@ public class ArticleDetailFragment extends Fragment implements
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && mPhotoView != null) {
             // set the transition name for the image
-            String tname = getString(R.string.transitionPhotoNamePref)
-                    + String.valueOf(mItemId);
+//            String tname = getString(R.string.transitionPhotoNamePref)
+//                    + String.valueOf(mItemId);
+            String tname = getString(R.string.transitionPhotoNamePref) + mPositionOfFragment;
             mPhotoView.setTransitionName(tname);
 
         }

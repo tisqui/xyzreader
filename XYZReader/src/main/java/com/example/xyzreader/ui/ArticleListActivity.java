@@ -1,7 +1,9 @@
 package com.example.xyzreader.ui;
 
+import android.annotation.TargetApi;
 import android.app.IntentService;
 import android.app.LoaderManager;
+import android.app.SharedElementCallback;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -19,6 +21,7 @@ import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.text.format.DateUtils;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -27,12 +30,16 @@ import com.example.xyzreader.data.ArticleLoader;
 import com.example.xyzreader.data.ItemsContract;
 import com.example.xyzreader.data.UpdaterService;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * An activity representing a list of Articles. This activity has different presentations for
  * handset and tablet-size devices. On handsets, the activity presents a list of items, which when
  * touched, lead to a {@link ArticleDetailActivity} representing item details. On tablets, the
  * activity presents a grid of items as cards.
  */
+@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class ArticleListActivity extends BaseActivity implements
         LoaderManager.LoaderCallbacks<Cursor>,SwipeRefreshLayout.OnRefreshListener {
     public static final String TRANSACTION_NAME_TAG = "TRANS_TAG";
@@ -41,8 +48,11 @@ public class ArticleListActivity extends BaseActivity implements
     private RecyclerView mRecyclerView;
     private Typeface mCustomFont;
     private IntentService mUpdaterService;
+    private Bundle mTmpReenterState;
 
     private boolean mIsRefreshing = false;
+    static final String EXTRA_STARTING_ALBUM_POSITION = "extra_starting_item_position";
+    static final String EXTRA_CURRENT_ALBUM_POSITION = "extra_current_item_position";
 
     private BroadcastReceiver mRefreshingReceiver = new BroadcastReceiver() {
         @Override
@@ -54,12 +64,51 @@ public class ArticleListActivity extends BaseActivity implements
         }
     };
 
+    private final SharedElementCallback mCallback = new SharedElementCallback() {
+        @Override
+        public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
+            if (mTmpReenterState != null) {
+                int startingPosition = mTmpReenterState.getInt(EXTRA_STARTING_ALBUM_POSITION);
+                int currentPosition = mTmpReenterState.getInt(EXTRA_CURRENT_ALBUM_POSITION);
+                if (startingPosition != currentPosition) {
+                    // If startingPosition != currentPosition the user must have swiped to a
+                    // different page in the DetailsActivity. We must update the shared element
+                    // so that the correct one falls into place.
+                    String newTransitionName = getString(R.string.transitionPhotoNamePref) + currentPosition;
+                    View newSharedElement = mRecyclerView.findViewWithTag(newTransitionName);
+                    if (newSharedElement != null) {
+                        names.clear();
+                        names.add(newTransitionName);
+                        sharedElements.clear();
+                        sharedElements.put(newTransitionName, newSharedElement);
+                    }
+                }
+
+                mTmpReenterState = null;
+            } else {
+                // If mTmpReenterState is null, then the activity is exiting.
+                View navigationBar = findViewById(android.R.id.navigationBarBackground);
+                View statusBar = findViewById(android.R.id.statusBarBackground);
+                if (navigationBar != null) {
+                    names.add(navigationBar.getTransitionName());
+                    sharedElements.put(navigationBar.getTransitionName(), navigationBar);
+                }
+                if (statusBar != null) {
+                    names.add(statusBar.getTransitionName());
+                    sharedElements.put(statusBar.getTransitionName(), statusBar);
+                }
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_article_list);
 
         getToolbar();
+
+        setExitSharedElementCallback(mCallback);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
 
@@ -130,6 +179,27 @@ public class ArticleListActivity extends BaseActivity implements
         mRecyclerView.setAdapter(null);
     }
 
+    @Override
+    public void onActivityReenter(int requestCode, Intent data) {
+        super.onActivityReenter(requestCode, data);
+        mTmpReenterState = new Bundle(data.getExtras());
+        int startingPosition = mTmpReenterState.getInt(EXTRA_STARTING_ALBUM_POSITION);
+        int currentPosition = mTmpReenterState.getInt(EXTRA_CURRENT_ALBUM_POSITION);
+        if (startingPosition != currentPosition) {
+            mRecyclerView.scrollToPosition(currentPosition);
+        }
+        postponeEnterTransition();
+        mRecyclerView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                mRecyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
+//                mRecyclerView.requestLayout();
+                startPostponedEnterTransition();
+                return true;
+            }
+        });
+    }
+
     private class Adapter extends RecyclerView.Adapter<ViewHolder> {
         private Cursor mCursor;
 
@@ -154,12 +224,16 @@ public class ArticleListActivity extends BaseActivity implements
                     Intent intent = new Intent(Intent.ACTION_VIEW,
                             ItemsContract.Items.buildItemUri(getItemId(vh.getAdapterPosition())));
 
+                    intent.putExtra(EXTRA_STARTING_ALBUM_POSITION, vh.getAdapterPosition());
+
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         //need to set the unique transition name for every fragment instance
                         ImageView image = (ImageView) view.findViewById(R.id.thumbnail);
                         long itemId = getItemId(vh.getAdapterPosition());
-                        String tName = getString(R.string.transitionPhotoNamePref) + String.valueOf(itemId);
+//                        String tName = getString(R.string.transitionPhotoNamePref) + String.valueOf(itemId);
+                        String tName = getString(R.string.transitionPhotoNamePref) + vh.getAdapterPosition();
                         image.setTransitionName(tName);
+                        image.setTag(tName);
                         ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
                                 ArticleListActivity.this,
                                 image,
@@ -209,6 +283,8 @@ public class ArticleListActivity extends BaseActivity implements
                     mCursor.getString(ArticleLoader.Query.PHOTO_URL),
                     ImageLoaderHelper.getInstance(ArticleListActivity.this).getImageLoader());
             holder.thumbnailView.setAspectRatio(mCursor.getFloat(ArticleLoader.Query.ASPECT_RATIO));
+
+            holder.thumbnailView.setTag(getString(R.string.transitionPhotoNamePref)+position);
         }
 
         @Override

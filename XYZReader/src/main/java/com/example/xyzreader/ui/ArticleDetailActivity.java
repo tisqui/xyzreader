@@ -1,8 +1,11 @@
 package com.example.xyzreader.ui;
 
+import android.annotation.TargetApi;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.LoaderManager;
+import android.app.SharedElementCallback;
+import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
@@ -14,14 +17,19 @@ import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.example.xyzreader.R;
 import com.example.xyzreader.data.ArticleLoader;
 import com.example.xyzreader.data.ItemsContract;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * An activity representing a single Article detail screen, letting you swipe between articles.
  */
+@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class ArticleDetailActivity extends BaseActivity
         implements LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -29,17 +37,57 @@ public class ArticleDetailActivity extends BaseActivity
     private long mStartId;
 
     private long mSelectedItemId;
-//    private int mSelectedItemUpButtonFloor = Integer.MAX_VALUE;
     private int mTopInset;
 
     private ViewPager mPager;
     private MyPagerAdapter mPagerAdapter;
-//    private View mUpButtonContainer;
-//    private View mUpButton;
+    private ArticleDetailFragment mCurrentFragment;
+
+    private int mCurrentPosition;
+    private int mStartingPosition;
+
+    private static final String CURRENT_PAGE_POSITION_TAG = "current_page";
+    private boolean mReturningFlag;
+
+    private final SharedElementCallback mCallback = new SharedElementCallback() {
+        @Override
+        public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
+            if (mReturningFlag) {
+                ImageView sharedElement = mCurrentFragment.getVisibleSharedPhotoView();
+                if (sharedElement == null) {
+                    // If shared element is null, then it has been scrolled off screen and
+                    // no longer visible. In this case we cancel the shared element transition by
+                    // removing the shared element from the shared elements map.
+                    names.clear();
+                    sharedElements.clear();
+                } else if (mStartingPosition != mCurrentPosition) {
+                    // If the user has swiped to a different ViewPager page, then we need to
+                    // remove the old shared element and replace it with the new shared element
+                    // that should be transitioned instead.
+                    names.clear();
+                    names.add(sharedElement.getTransitionName());
+                    sharedElements.clear();
+                    sharedElements.put(sharedElement.getTransitionName(), sharedElement);
+                }
+            }
+        }
+    };
+
+    @Override
+    public void finishAfterTransition() {
+        mReturningFlag = true;
+        Intent data = new Intent();
+        data.putExtra(ArticleListActivity.EXTRA_STARTING_ALBUM_POSITION, mStartingPosition);
+        data.putExtra(ArticleListActivity.EXTRA_CURRENT_ALBUM_POSITION, mCurrentPosition);
+        setResult(RESULT_OK, data);
+        super.finishAfterTransition();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        setEnterSharedElementCallback(mCallback);
 
         Bundle extras = getIntent().getExtras();
         if(extras != null){
@@ -61,7 +109,6 @@ public class ArticleDetailActivity extends BaseActivity
         }
 
         getLoaderManager().initLoader(0, null, this);
-
         mPagerAdapter = new MyPagerAdapter(getFragmentManager());
         mPager = (ViewPager) findViewById(R.id.pager);
         mPager.setAdapter(mPagerAdapter);
@@ -73,9 +120,6 @@ public class ArticleDetailActivity extends BaseActivity
             @Override
             public void onPageScrollStateChanged(int state) {
                 super.onPageScrollStateChanged(state);
-//                mUpButton.animate()
-//                        .alpha((state == ViewPager.SCROLL_STATE_IDLE) ? 1f : 0f)
-//                        .setDuration(300);
             }
 
             @Override
@@ -84,40 +128,28 @@ public class ArticleDetailActivity extends BaseActivity
                     mCursor.moveToPosition(position);
                 }
                 mSelectedItemId = mCursor.getLong(ArticleLoader.Query._ID);
-//                updateUpButtonPosition();
+                mCurrentPosition = position;
             }
         });
 
-//        mUpButtonContainer = findViewById(R.id.up_container);
-//
-//        mUpButton = findViewById(R.id.action_up);
-//        mUpButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                onSupportNavigateUp();
-//            }
-//        });
-//
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//            mUpButtonContainer.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
-//                @Override
-//                public WindowInsets onApplyWindowInsets(View view, WindowInsets windowInsets) {
-//                    view.onApplyWindowInsets(windowInsets);
-//                    mTopInset = windowInsets.getSystemWindowInsetTop();
-//                    mUpButtonContainer.setTranslationY(mTopInset);
-//                    updateUpButtonPosition();
-//                    return windowInsets;
-//                }
-//            });
-//        }
-
+        mStartingPosition = getIntent().getIntExtra(ArticleListActivity.EXTRA_STARTING_ALBUM_POSITION, 0);
         if (savedInstanceState == null) {
+            mCurrentPosition = mStartingPosition;
             if (getIntent() != null && getIntent().getData() != null) {
                 mStartId = ItemsContract.Items.getItemId(getIntent().getData());
                 mSelectedItemId = mStartId;
             }
+        }else {
+            mCurrentPosition = savedInstanceState.getInt(CURRENT_PAGE_POSITION_TAG);
         }
     }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(CURRENT_PAGE_POSITION_TAG, mCurrentPosition);
+    }
+
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
@@ -151,18 +183,6 @@ public class ArticleDetailActivity extends BaseActivity
         mPagerAdapter.notifyDataSetChanged();
     }
 
-    public void onUpButtonFloorChanged(long itemId, ArticleDetailFragment fragment) {
-        if (itemId == mSelectedItemId) {
-//            mSelectedItemUpButtonFloor = fragment.getUpButtonFloor();
-//            updateUpButtonPosition();
-        }
-    }
-
-//    private void updateUpButtonPosition() {
-//        int upButtonNormalBottom = mTopInset + mUpButton.getHeight();
-//        mUpButton.setTranslationY(Math.min(mSelectedItemUpButtonFloor - upButtonNormalBottom, 0));
-//    }
-
     private class MyPagerAdapter extends FragmentStatePagerAdapter {
         public MyPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -171,17 +191,13 @@ public class ArticleDetailActivity extends BaseActivity
         @Override
         public void setPrimaryItem(ViewGroup container, int position, Object object) {
             super.setPrimaryItem(container, position, object);
-            ArticleDetailFragment fragment = (ArticleDetailFragment) object;
-            if (fragment != null) {
-//                mSelectedItemUpButtonFloor = fragment.getUpButtonFloor();
-//                updateUpButtonPosition();
-            }
+            mCurrentFragment = (ArticleDetailFragment) object;
         }
 
         @Override
         public Fragment getItem(int position) {
             mCursor.moveToPosition(position);
-            return ArticleDetailFragment.newInstance(mCursor.getLong(ArticleLoader.Query._ID));
+            return ArticleDetailFragment.newInstance(mCursor.getLong(ArticleLoader.Query._ID), position);
         }
 
         @Override
