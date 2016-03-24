@@ -38,6 +38,7 @@ public class DrawInsetsFrameLayout extends FrameLayout {
     private Rect mInsets;
     private Rect mTempRect = new Rect();
     private OnInsetsCallback mOnInsetsCallback;
+    private int mActionBarSize;
 
     public DrawInsetsFrameLayout(Context context) {
         super(context);
@@ -103,9 +104,15 @@ public class DrawInsetsFrameLayout extends FrameLayout {
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
         insets = super.onApplyWindowInsets(insets);
+        final TypedArray styledAttributes = getContext().getTheme().obtainStyledAttributes(
+                new int[] { android.R.attr.actionBarSize });
+        mActionBarSize = (int) styledAttributes.getDimension(0, 0);
+        styledAttributes.recycle();
+
         mInsets = new Rect(
                 insets.getSystemWindowInsetLeft(),
-                insets.getSystemWindowInsetTop(),
+//                insets.getSystemWindowInsetTop()+
+                        mActionBarSize,
                 insets.getSystemWindowInsetRight(),
                 insets.getSystemWindowInsetBottom());
         setWillNotDraw(false);

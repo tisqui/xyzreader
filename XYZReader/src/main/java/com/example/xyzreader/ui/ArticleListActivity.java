@@ -49,8 +49,8 @@ public class ArticleListActivity extends BaseActivity implements
     private Bundle mTmpReenterState;
 
     private boolean mIsRefreshing = false;
-    static final String EXTRA_STARTING_ALBUM_POSITION = "extra_starting_item_position";
-    static final String EXTRA_CURRENT_ALBUM_POSITION = "extra_current_item_position";
+    static final String STARTING_POSITION = "starting_position";
+    static final String CURRENT_POSITION = "current_position";
 
     private BroadcastReceiver mRefreshingReceiver = new BroadcastReceiver() {
         @Override
@@ -62,42 +62,6 @@ public class ArticleListActivity extends BaseActivity implements
         }
     };
 
-//    private final SharedElementCallback mCallback = new SharedElementCallback() {
-//        @Override
-//        public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
-//            if (mTmpReenterState != null) {
-//                int startingPosition = mTmpReenterState.getInt(EXTRA_STARTING_ALBUM_POSITION);
-//                int currentPosition = mTmpReenterState.getInt(EXTRA_CURRENT_ALBUM_POSITION);
-//                if (startingPosition != currentPosition) {
-//                    // If startingPosition != currentPosition the user must have swiped to a
-//                    // different page in the DetailsActivity. We must update the shared element
-//                    // so that the correct one falls into place.
-//                    String newTransitionName = getString(R.string.transitionPhotoNamePref) + currentPosition;
-//                    View newSharedElement = mRecyclerView.findViewWithTag(newTransitionName);
-//                    if (newSharedElement != null) {
-//                        names.clear();
-//                        names.add(newTransitionName);
-//                        sharedElements.clear();
-//                        sharedElements.put(newTransitionName, newSharedElement);
-//                    }
-//                }
-//
-//                mTmpReenterState = null;
-//            } else {
-//                // If mTmpReenterState is null, then the activity is exiting.
-//                View navigationBar = findViewById(android.R.id.navigationBarBackground);
-//                View statusBar = findViewById(android.R.id.statusBarBackground);
-//                if (navigationBar != null) {
-//                    names.add(navigationBar.getTransitionName());
-//                    sharedElements.put(navigationBar.getTransitionName(), navigationBar);
-//                }
-//                if (statusBar != null) {
-//                    names.add(statusBar.getTransitionName());
-//                    sharedElements.put(statusBar.getTransitionName(), statusBar);
-//                }
-//            }
-//        }
-//    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,8 +77,8 @@ public class ArticleListActivity extends BaseActivity implements
                 @Override
                 public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
                     if (mTmpReenterState != null) {
-                        int startingPosition = mTmpReenterState.getInt(EXTRA_STARTING_ALBUM_POSITION);
-                        int currentPosition = mTmpReenterState.getInt(EXTRA_CURRENT_ALBUM_POSITION);
+                        int startingPosition = mTmpReenterState.getInt(STARTING_POSITION);
+                        int currentPosition = mTmpReenterState.getInt(CURRENT_POSITION);
                         if (startingPosition != currentPosition) {
                             // If startingPosition != currentPosition update the shared element
                             String newTransitionName = getString(R.string.transitionPhotoNamePref) + currentPosition;
@@ -218,8 +182,8 @@ public class ArticleListActivity extends BaseActivity implements
     public void onActivityReenter(int requestCode, Intent data) {
         super.onActivityReenter(requestCode, data);
         mTmpReenterState = new Bundle(data.getExtras());
-        int startingPosition = mTmpReenterState.getInt(EXTRA_STARTING_ALBUM_POSITION);
-        int currentPosition = mTmpReenterState.getInt(EXTRA_CURRENT_ALBUM_POSITION);
+        int startingPosition = mTmpReenterState.getInt(STARTING_POSITION);
+        int currentPosition = mTmpReenterState.getInt(CURRENT_POSITION);
         if (startingPosition != currentPosition) {
             mRecyclerView.scrollToPosition(currentPosition);
         }
@@ -228,7 +192,7 @@ public class ArticleListActivity extends BaseActivity implements
             @Override
             public boolean onPreDraw() {
                 mRecyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
-//                mRecyclerView.requestLayout();
+                mRecyclerView.requestLayout();
                 startPostponedEnterTransition();
                 return true;
             }
@@ -259,7 +223,7 @@ public class ArticleListActivity extends BaseActivity implements
                     Intent intent = new Intent(Intent.ACTION_VIEW,
                             ItemsContract.Items.buildItemUri(getItemId(vh.getAdapterPosition())));
 
-                    intent.putExtra(EXTRA_STARTING_ALBUM_POSITION, vh.getAdapterPosition());
+                    intent.putExtra(STARTING_POSITION, vh.getAdapterPosition());
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         //need to set the unique transition name for every fragment instance

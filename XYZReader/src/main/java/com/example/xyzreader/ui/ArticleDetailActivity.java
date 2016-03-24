@@ -1,6 +1,5 @@
 package com.example.xyzreader.ui;
 
-import android.annotation.TargetApi;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.LoaderManager;
@@ -48,36 +47,12 @@ public class ArticleDetailActivity extends BaseActivity
     private static final String CURRENT_PAGE_POSITION_TAG = "current_page";
     private boolean mReturningFlag;
 
-//    private final SharedElementCallback mCallback = new SharedElementCallback() {
-//        @Override
-//        public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
-//            if (mReturningFlag) {
-//                ImageView sharedElement = mCurrentFragment.getVisibleSharedPhotoView();
-//                if (sharedElement == null) {
-//                    // If shared element is null, then it has been scrolled off screen and
-//                    // no longer visible. In this case we cancel the shared element transition by
-//                    // removing the shared element from the shared elements map.
-//                    names.clear();
-//                    sharedElements.clear();
-//                } else if (mStartingPosition != mCurrentPosition) {
-//                    // If the user has swiped to a different ViewPager page, then we need to
-//                    // remove the old shared element and replace it with the new shared element
-//                    // that should be transitioned instead.
-//                    names.clear();
-//                    names.add(sharedElement.getTransitionName());
-//                    sharedElements.clear();
-//                    sharedElements.put(sharedElement.getTransitionName(), sharedElement);
-//                }
-//            }
-//        }
-//    };
-
     @Override
     public void finishAfterTransition() {
         mReturningFlag = true;
         Intent data = new Intent();
-        data.putExtra(ArticleListActivity.EXTRA_STARTING_ALBUM_POSITION, mStartingPosition);
-        data.putExtra(ArticleListActivity.EXTRA_CURRENT_ALBUM_POSITION, mCurrentPosition);
+        data.putExtra(ArticleListActivity.STARTING_POSITION, mStartingPosition);
+        data.putExtra(ArticleListActivity.CURRENT_POSITION, mCurrentPosition);
         setResult(RESULT_OK, data);
         super.finishAfterTransition();
     }
@@ -153,7 +128,7 @@ public class ArticleDetailActivity extends BaseActivity
             }
         });
 
-        mStartingPosition = getIntent().getIntExtra(ArticleListActivity.EXTRA_STARTING_ALBUM_POSITION, 0);
+        mStartingPosition = getIntent().getIntExtra(ArticleListActivity.STARTING_POSITION, 0);
         if (savedInstanceState == null) {
             mCurrentPosition = mStartingPosition;
             if (getIntent() != null && getIntent().getData() != null) {

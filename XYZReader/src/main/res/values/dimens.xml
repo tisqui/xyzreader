@@ -8,4 +8,20 @@
     <dimen name="fab_press_translation_z">6dp</dimen>
     <dimen name="fab_margin">24dp</dimen>
 
+    <dimen name="logo_top_margin">64dp</dimen>
+    <dimen name="logo_left_margin">16dp</dimen>
+    <dimen name="app_bar_initial_height">168dp</dimen>
+    <dimen name="expanded_title_margin_start">72dp</dimen>
+    <dimen name="collapsing_toolbar_padding_bottom">8dp</dimen>
+    <dimen name="recycler_view_padding_bottom">28dp</dimen>
+    <dimen name="coordinator_margin_top">24dp</dimen>
+    <dimen name="detail_photo_height_">500dp</dimen>
+    <dimen name="detail_tab_height">112dp</dimen>
+    <dimen name="fab_width">56dp</dimen>
+    <dimen name="fab_height">56dp</dimen>
+    <dimen name="fab_border_width">0dp</dimen>
+    <dimen name="list_item_margin">4dp</dimen>
+    <dimen name="text_padding">16dp</dimen>
+    <dimen name="toolbar_inset_start">72dp</dimen>
+
 </resources>

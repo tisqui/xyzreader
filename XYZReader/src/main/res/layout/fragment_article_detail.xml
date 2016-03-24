@@ -23,13 +23,13 @@
                 <ImageView
                     android:id="@+id/photo"
                     android:layout_width="match_parent"
-                    android:layout_height="500dp"
+                    android:layout_height="@dimen/detail_photo_height_"
                     android:scaleType="centerCrop"
                     />
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="112dp"
+                    android:layout_height="@dimen/detail_tab_height"
                     android:background="@drawable/photo_background_protection"/>
 
             </FrameLayout>
@@ -97,8 +97,8 @@
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/share_fab"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
+        android:layout_width="@dimen/fab_width"
+        android:layout_height="@dimen/fab_height"
         android:layout_gravity="bottom|right|end"
         android:layout_marginBottom="@dimen/fab_margin"
         android:layout_marginRight="@dimen/fab_margin"
@@ -106,7 +106,7 @@
         android:contentDescription="@string/action_share"
         android:elevation="@dimen/fab_elevation"
         android:src="@drawable/ic_share_variant"
-        app:borderWidth="0dp"/>
+        app:borderWidth="@dimen/fab_border_width"/>
 
 
 </com.example.xyzreader.ui.DrawInsetsFrameLayout>
