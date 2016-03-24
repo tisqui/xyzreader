@@ -29,7 +29,6 @@ import java.util.Map;
 /**
  * An activity representing a single Article detail screen, letting you swipe between articles.
  */
-@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class ArticleDetailActivity extends BaseActivity
         implements LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -49,29 +48,29 @@ public class ArticleDetailActivity extends BaseActivity
     private static final String CURRENT_PAGE_POSITION_TAG = "current_page";
     private boolean mReturningFlag;
 
-    private final SharedElementCallback mCallback = new SharedElementCallback() {
-        @Override
-        public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
-            if (mReturningFlag) {
-                ImageView sharedElement = mCurrentFragment.getVisibleSharedPhotoView();
-                if (sharedElement == null) {
-                    // If shared element is null, then it has been scrolled off screen and
-                    // no longer visible. In this case we cancel the shared element transition by
-                    // removing the shared element from the shared elements map.
-                    names.clear();
-                    sharedElements.clear();
-                } else if (mStartingPosition != mCurrentPosition) {
-                    // If the user has swiped to a different ViewPager page, then we need to
-                    // remove the old shared element and replace it with the new shared element
-                    // that should be transitioned instead.
-                    names.clear();
-                    names.add(sharedElement.getTransitionName());
-                    sharedElements.clear();
-                    sharedElements.put(sharedElement.getTransitionName(), sharedElement);
-                }
-            }
-        }
-    };
+//    private final SharedElementCallback mCallback = new SharedElementCallback() {
+//        @Override
+//        public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
+//            if (mReturningFlag) {
+//                ImageView sharedElement = mCurrentFragment.getVisibleSharedPhotoView();
+//                if (sharedElement == null) {
+//                    // If shared element is null, then it has been scrolled off screen and
+//                    // no longer visible. In this case we cancel the shared element transition by
+//                    // removing the shared element from the shared elements map.
+//                    names.clear();
+//                    sharedElements.clear();
+//                } else if (mStartingPosition != mCurrentPosition) {
+//                    // If the user has swiped to a different ViewPager page, then we need to
+//                    // remove the old shared element and replace it with the new shared element
+//                    // that should be transitioned instead.
+//                    names.clear();
+//                    names.add(sharedElement.getTransitionName());
+//                    sharedElements.clear();
+//                    sharedElements.put(sharedElement.getTransitionName(), sharedElement);
+//                }
+//            }
+//        }
+//    };
 
     @Override
     public void finishAfterTransition() {
@@ -87,7 +86,29 @@ public class ArticleDetailActivity extends BaseActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setEnterSharedElementCallback(mCallback);
+        //use the onMapSharedElements only if the APi version in 21+
+        //on the older version back transition animation won't be available
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            setEnterSharedElementCallback(new SharedElementCallback() {
+                @Override
+                public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
+                    if (mReturningFlag) {
+                        ImageView sharedElement = mCurrentFragment.getVisibleSharedPhotoView();
+                        if (sharedElement == null) {
+                            // If shared element is null - cancel the shared element transition
+                            names.clear();
+                            sharedElements.clear();
+                        } else if (mStartingPosition != mCurrentPosition) {
+                            //user swiped to the different pager element
+                            names.clear();
+                            names.add(sharedElement.getTransitionName());
+                            sharedElements.clear();
+                            sharedElements.put(sharedElement.getTransitionName(), sharedElement);
+                        }
+                    }
+                }
+            });
+        }
 
         Bundle extras = getIntent().getExtras();
         if(extras != null){

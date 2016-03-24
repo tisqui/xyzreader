@@ -1,6 +1,5 @@
 package com.example.xyzreader.ui;
 
-import android.annotation.TargetApi;
 import android.app.IntentService;
 import android.app.LoaderManager;
 import android.app.SharedElementCallback;
@@ -39,7 +38,6 @@ import java.util.Map;
  * touched, lead to a {@link ArticleDetailActivity} representing item details. On tablets, the
  * activity presents a grid of items as cards.
  */
-@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class ArticleListActivity extends BaseActivity implements
         LoaderManager.LoaderCallbacks<Cursor>,SwipeRefreshLayout.OnRefreshListener {
     public static final String TRANSACTION_NAME_TAG = "TRANS_TAG";
@@ -64,42 +62,42 @@ public class ArticleListActivity extends BaseActivity implements
         }
     };
 
-    private final SharedElementCallback mCallback = new SharedElementCallback() {
-        @Override
-        public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
-            if (mTmpReenterState != null) {
-                int startingPosition = mTmpReenterState.getInt(EXTRA_STARTING_ALBUM_POSITION);
-                int currentPosition = mTmpReenterState.getInt(EXTRA_CURRENT_ALBUM_POSITION);
-                if (startingPosition != currentPosition) {
-                    // If startingPosition != currentPosition the user must have swiped to a
-                    // different page in the DetailsActivity. We must update the shared element
-                    // so that the correct one falls into place.
-                    String newTransitionName = getString(R.string.transitionPhotoNamePref) + currentPosition;
-                    View newSharedElement = mRecyclerView.findViewWithTag(newTransitionName);
-                    if (newSharedElement != null) {
-                        names.clear();
-                        names.add(newTransitionName);
-                        sharedElements.clear();
-                        sharedElements.put(newTransitionName, newSharedElement);
-                    }
-                }
-
-                mTmpReenterState = null;
-            } else {
-                // If mTmpReenterState is null, then the activity is exiting.
-                View navigationBar = findViewById(android.R.id.navigationBarBackground);
-                View statusBar = findViewById(android.R.id.statusBarBackground);
-                if (navigationBar != null) {
-                    names.add(navigationBar.getTransitionName());
-                    sharedElements.put(navigationBar.getTransitionName(), navigationBar);
-                }
-                if (statusBar != null) {
-                    names.add(statusBar.getTransitionName());
-                    sharedElements.put(statusBar.getTransitionName(), statusBar);
-                }
-            }
-        }
-    };
+//    private final SharedElementCallback mCallback = new SharedElementCallback() {
+//        @Override
+//        public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
+//            if (mTmpReenterState != null) {
+//                int startingPosition = mTmpReenterState.getInt(EXTRA_STARTING_ALBUM_POSITION);
+//                int currentPosition = mTmpReenterState.getInt(EXTRA_CURRENT_ALBUM_POSITION);
+//                if (startingPosition != currentPosition) {
+//                    // If startingPosition != currentPosition the user must have swiped to a
+//                    // different page in the DetailsActivity. We must update the shared element
+//                    // so that the correct one falls into place.
+//                    String newTransitionName = getString(R.string.transitionPhotoNamePref) + currentPosition;
+//                    View newSharedElement = mRecyclerView.findViewWithTag(newTransitionName);
+//                    if (newSharedElement != null) {
+//                        names.clear();
+//                        names.add(newTransitionName);
+//                        sharedElements.clear();
+//                        sharedElements.put(newTransitionName, newSharedElement);
+//                    }
+//                }
+//
+//                mTmpReenterState = null;
+//            } else {
+//                // If mTmpReenterState is null, then the activity is exiting.
+//                View navigationBar = findViewById(android.R.id.navigationBarBackground);
+//                View statusBar = findViewById(android.R.id.statusBarBackground);
+//                if (navigationBar != null) {
+//                    names.add(navigationBar.getTransitionName());
+//                    sharedElements.put(navigationBar.getTransitionName(), navigationBar);
+//                }
+//                if (statusBar != null) {
+//                    names.add(statusBar.getTransitionName());
+//                    sharedElements.put(statusBar.getTransitionName(), statusBar);
+//                }
+//            }
+//        }
+//    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,7 +106,44 @@ public class ArticleListActivity extends BaseActivity implements
 
         getToolbar();
 
-        setExitSharedElementCallback(mCallback);
+        //use the onMapSharedElements only if the APi version in 21+
+        //on the older version back transition animation won't be available
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            setExitSharedElementCallback(new SharedElementCallback() {
+                @Override
+                public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
+                    if (mTmpReenterState != null) {
+                        int startingPosition = mTmpReenterState.getInt(EXTRA_STARTING_ALBUM_POSITION);
+                        int currentPosition = mTmpReenterState.getInt(EXTRA_CURRENT_ALBUM_POSITION);
+                        if (startingPosition != currentPosition) {
+                            // If startingPosition != currentPosition update the shared element
+                            String newTransitionName = getString(R.string.transitionPhotoNamePref) + currentPosition;
+                            View newSharedElement = mRecyclerView.findViewWithTag(newTransitionName);
+                            if (newSharedElement != null) {
+                                names.clear();
+                                names.add(newTransitionName);
+                                sharedElements.clear();
+                                sharedElements.put(newTransitionName, newSharedElement);
+                            }
+                        }
+
+                        mTmpReenterState = null;
+                    } else {
+                        // If mTmpReenterState is null, then the activity is exiting.
+                        View navigationBar = findViewById(android.R.id.navigationBarBackground);
+                        View statusBar = findViewById(android.R.id.statusBarBackground);
+                        if (navigationBar != null) {
+                            names.add(navigationBar.getTransitionName());
+                            sharedElements.put(navigationBar.getTransitionName(), navigationBar);
+                        }
+                        if (statusBar != null) {
+                            names.add(statusBar.getTransitionName());
+                            sharedElements.put(statusBar.getTransitionName(), statusBar);
+                        }
+                    }
+                }
+            });
+        }
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
 
