@@ -11,3 +11,12 @@ UI and make it conform to Material Design.
 * Shared transition with transition delay and custom SharedElementCallback(overriding onMapSharedElements()) 
 for correct back transition when ViewPager elements swiped (great thanks to https://github.com/alexjlockwood/activity-transitions) 
 * Phones and tablets support
+
+###Screenshots
+<img src="https://cloud.githubusercontent.com/assets/6324839/14239746/ed1ed706-f9f3-11e5-83b9-36d7da99390a.png" height="600">
+<img src="https://cloud.githubusercontent.com/assets/6324839/14239749/ee6c1e20-f9f3-11e5-8a0f-2bc07dcc3f9e.png" height="600">
+
+Tablet animation example:
+
+<img src="https://cloud.githubusercontent.com/assets/6324839/14239759/0ed81682-f9f4-11e5-86c8-9f049cc58168.gif">
+
